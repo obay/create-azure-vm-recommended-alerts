@@ -42,11 +42,11 @@ Run the script:
 .\GenerateTerraformRecommendedAlertsCode.ps1 -AlertsResourceGroupName "monitoring-rg" -ActionGroupResourceGroupName "monitoring-rg" -ActionGroupName "monitoring-action-group" -TagKey "Environment" -TagValue "Production"
 ```
 
-- AlertsResourceGroupName: The name of the resource group where the alerts will be created.
-- ActionGroupResourceGroupName: The name of the resource group where the action group exists.
-- ActionGroupName: The name of the action group to use for the alerts.
-- TagKey: The key of the tag to filter VMs.
-- TagValue: The value of the tag to filter VMs.
+- `AlertsResourceGroupName`: The name of the resource group where the alerts will be created.
+- `ActionGroupResourceGroupName`: The name of the resource group where the action group exists.
+- `ActionGroupName`: The name of the action group to use for the alerts.
+- `TagKey`: The key of the tag to filter VMs.
+- `TagValue`: The value of the tag to filter VMs.
 
 ## How to deploy the Terraform code
 
