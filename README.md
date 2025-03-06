@@ -68,6 +68,18 @@ Plan the deployment:
 terraform plan -var-file="terraform.tfvars"
 ```
 
+Install Azure CLI:
+
+```powershell
+scoop install azure-cli
+```
+
+Authenticate with Azure:
+
+```powershell
+az login
+```
+
 Apply the deployment:
 
 ```powershell
