@@ -5,6 +5,7 @@
 .DESCRIPTION
     This script creates Terraform module configurations for recommended alerts for Azure VMs in Production.
     It generates individual .tf files for each VM with alert configurations linked to a specified action group.
+    The script iterates through all accessible subscriptions.
 
 .PARAMETER AlertsResourceGroupName
     The name of the resource group where the alerts will be created.
@@ -21,8 +22,11 @@
 .PARAMETER TagValue
     The value of the tag to filter VMs.
 
+.PARAMETER ActionGroupSubscriptionId
+    The ID of the subscription containing the action group.
+
 .EXAMPLE
-    .\GenerateTerraformRecommendedAlertsCode.ps1 -AlertsResourceGroupName "monitoring-rg" -ActionGroupResourceGroupName "monitoring-rg" -ActionGroupName "monitoring-action-group" -TagKey "Environment" -TagValue "Production"
+    .\GenerateTerraformRecommendedAlertsCode.ps1 -AlertsResourceGroupName "monitoring-rg" -ActionGroupResourceGroupName "monitoring-rg" -ActionGroupName "monitoring-action-group" -TagKey "Environment" -TagValue "Production" -ActionGroupSubscriptionId "abd5b4fd-a8fd-40db-8c20-25af66c54e0c"
 
 .NOTES
     Requires: Az PowerShell module
@@ -43,17 +47,52 @@ param(
     [string]$TagKey,
 
     [Parameter(Mandatory=$true)]
-    [string]$TagValue
+    [string]$TagValue,
+
+    [Parameter(Mandatory=$true)]
+    [string]$ActionGroupSubscriptionId
 )
 
-$actionGroupId = (Get-AzActionGroup -ResourceGroupName $ActionGroupResourceGroupName -Name $ActionGroupName).Id
-$vmList = Get-AzVM -Status | Where-Object { $_.Tags[$TagKey] -eq $TagValue }
-foreach ($vm in $vmList) {
-    # Create the filename using the specified pattern
-    $fileName = "module.$($vm.Name)-recommended-alerts.tf"
+# Get all subscriptions
+$subscriptions = Get-AzSubscription
+
+# First, get the action group ID from the specified subscription
+$actionGroupId = $null
+try {
+    # Set context to the subscription containing the action group
+    Set-AzContext -Subscription $ActionGroupSubscriptionId | Out-Null
+
+    # Get the action group ID
+    $actionGroupId = (Get-AzActionGroup -ResourceGroupName $ActionGroupResourceGroupName -Name $ActionGroupName).Id
     
-    # Define the template with placeholders
-    $template = @"
+    if ([string]::IsNullOrEmpty($actionGroupId)) {
+        throw "Action group ID is null or empty for group '$ActionGroupName' in resource group '$ActionGroupResourceGroupName'"
+    }
+}
+catch {
+    Write-Error "Failed to get action group ID: $_"
+    exit 1
+}
+
+# Now iterate through all subscriptions for VM processing
+foreach ($subscription in $subscriptions) {
+    Write-Host "Processing subscription: $($subscription.Name)"
+    
+    # Set the context to the current subscription
+    Set-AzContext -Subscription $subscription.Id | Out-Null
+    
+    try {
+        # Get VMs with matching tags in the current subscription
+        $vmList = Get-AzVM -Status | Where-Object { $_.Tags[$TagKey] -eq $TagValue }
+        
+        foreach ($vm in $vmList) {
+            Write-Host "Generating alert configuration for VM: $($vm.Name)"
+            
+            # Create the filename using the specified pattern
+            $fileName = "module.$($vm.Name)-recommended-alerts.tf"
+            
+            # Define the template with placeholders
+            $template = @"
 module "{0}-recommended-alerts" {{
   source                              = "obay/recommended-alerts/azurerm"
   version                             = "0.0.7"
@@ -64,11 +103,17 @@ module "{0}-recommended-alerts" {{
 }}
 "@
 
-    # Format the template
-    $content = $template -f $vm.Name, $vm.Id, $AlertsResourceGroupName, $actionGroupId
+            # Format the template
+            $content = $template -f $vm.Name, $vm.Id, $AlertsResourceGroupName, $actionGroupId
 
-    # Write content to file
-    $content | Out-File -FilePath $fileName -Encoding UTF8
+            # Write content to file
+            $content | Out-File -FilePath $fileName -Encoding UTF8
+        }
+    }
+    catch {
+        Write-Warning "Error processing subscription $($subscription.Name): $_"
+        continue
+    }
 }
 
 terraform fmt
