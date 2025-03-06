@@ -25,8 +25,17 @@
 .PARAMETER ActionGroupSubscriptionId
     The ID of the subscription containing the action group.
 
+.PARAMETER ClientId
+    The client ID for the service principal.
+
+.PARAMETER ClientSecret
+    The client secret for the service principal.
+
+.PARAMETER TenantId
+    The tenant ID for the service principal.
+
 .EXAMPLE
-    .\GenerateTerraformRecommendedAlertsCode.ps1 -AlertsResourceGroupName "monitoring-rg" -ActionGroupResourceGroupName "monitoring-rg" -ActionGroupName "monitoring-action-group" -TagKey "Environment" -TagValue "Production" -ActionGroupSubscriptionId "abd5b4fd-a8fd-40db-8c20-25af66c54e0c"
+    .\GenerateTerraformRecommendedAlertsCode.ps1 -AlertsResourceGroupName "monitoring-rg" -ActionGroupResourceGroupName "monitoring-rg" -ActionGroupName "monitoring-action-group" -TagKey "Environment" -TagValue "Production" -ClientId "00000000-0000-0000-0000-000000000000" -ClientSecret "your-client-secret" -TenantId "11111111-1111-1111-1111-111111111111"
 
 .NOTES
     Requires: Az PowerShell module
@@ -50,8 +59,23 @@ param(
     [string]$TagValue,
 
     [Parameter(Mandatory=$true)]
-    [string]$ActionGroupSubscriptionId
+    [string]$ActionGroupSubscriptionId,
+
+    [Parameter(Mandatory=$true)]
+    [string]$ClientId,
+
+    [Parameter(Mandatory=$true)]
+    [string]$ClientSecret,
+
+    [Parameter(Mandatory=$true)]
+    [string]$TenantId
 )
+
+# Login using a service principal
+$credential = New-Object System.Management.Automation.PSCredential($ClientId, (ConvertTo-SecureString $ClientSecret -AsPlainText -Force))
+Connect-AzAccount -ServicePrincipal -Tenant $TenantId -Credential $credential
+
+
 
 # Get all subscriptions
 $subscriptions = Get-AzSubscription
