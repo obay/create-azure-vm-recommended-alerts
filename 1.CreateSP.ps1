@@ -92,15 +92,10 @@ try {
     Write-Host "Found root management group: $($rootMG.DisplayName) ($($rootMG.Name))"
 
     # Create service principal
-    $sp = New-AzADServicePrincipal -DisplayName $ServicePrincipalName
+    $sp = New-AzADServicePrincipal -DisplayName $ServicePrincipalName -Role $RoleName -Scope "/providers/Microsoft.Management/managementGroups/$($rootMG.Name)"
 
     # Create a new password for the service principal
     $spPassword = New-AzADSpCredential -ObjectId $sp.Id -EndDate (Get-Date).AddYears(2)
-
-    # Assign role at root management group level
-    $roleAssignment = New-AzRoleAssignment -ApplicationId $sp.AppId `
-        -RoleDefinitionName $RoleName `
-        -Scope "/providers/Microsoft.Management/managementGroups/$($rootMG.Name)"
 
     Write-Host "Assigned role '$RoleName' at root management group scope"
 
