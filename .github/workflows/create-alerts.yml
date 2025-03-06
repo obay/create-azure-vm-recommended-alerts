@@ -43,15 +43,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: 'Azure Login'
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-        enable-AzPSSession: true
-
     - name: 'Install Az PowerShell module'
       shell: pwsh
       run: |
@@ -61,12 +52,15 @@ jobs:
       shell: pwsh
       run: |
         ./GenerateTerraformRecommendedAlertsCode.ps1 `
-          -AlertsResourceGroupName "${{ github.event.inputs.alertsResourceGroupName }}" `
-          -ActionGroupResourceGroupName "${{ github.event.inputs.actionGroupResourceGroupName }}" `
-          -ActionGroupName "${{ github.event.inputs.actionGroupName }}" `
-          -TagKey "${{ github.event.inputs.tagKey }}" `
-          -TagValue "${{ github.event.inputs.tagValue }}" `
-          -ActionGroupSubscriptionId "${{ github.event.inputs.actionGroupSubscriptionId }}"
+        -ActionGroupName "${{ github.event.inputs.actionGroupName }}" `
+        -ActionGroupResourceGroupName "${{ github.event.inputs.actionGroupResourceGroupName }}" `
+        -ActionGroupSubscriptionId "${{ github.event.inputs.actionGroupSubscriptionId }}" `
+        -AlertsResourceGroupName "${{ github.event.inputs.alertsResourceGroupName }}" `
+        -TagKey "${{ github.event.inputs.tagKey }}" `
+        -TagValue "${{ github.event.inputs.tagValue }}" `
+        -ClientId "${{ secrets.AZURE_CLIENT_ID }}" `
+        -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}" `
+        -TenantId "${{ secrets.AZURE_TENANT_ID }}"
 
     - name: Commit Terraform Configuration
       run: |
@@ -75,35 +69,3 @@ jobs:
         git add *.tf
         git commit -m "feat: Update Azure VM alert configurations" || echo "No changes to commit"
         git push
-
-    - name: 'Setup Terraform'
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.7.0"
-
-    - name: 'Terraform Init'
-      run: terraform init
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-    - name: 'Terraform Validate'
-      run: terraform validate
-
-    - name: 'Terraform Plan'
-      run: terraform plan -out=tfplan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-    - name: 'Terraform Apply'
-      run: terraform apply -auto-approve tfplan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }} 
