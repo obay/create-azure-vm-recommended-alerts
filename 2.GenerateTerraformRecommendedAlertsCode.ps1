@@ -44,22 +44,22 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [string]$AlertsResourceGroupName,
-    
+    [string]$ActionGroupName,
+
     [Parameter(Mandatory=$true)]
     [string]$ActionGroupResourceGroupName,
     
     [Parameter(Mandatory=$true)]
-    [string]$ActionGroupName,
-
+    [string]$ActionGroupSubscriptionId,
+    
+    [Parameter(Mandatory=$true)]
+    [string]$AlertsResourceGroupName,
+    
     [Parameter(Mandatory=$true)]
     [string]$TagKey,
 
     [Parameter(Mandatory=$true)]
     [string]$TagValue,
-
-    [Parameter(Mandatory=$true)]
-    [string]$ActionGroupSubscriptionId,
 
     [Parameter(Mandatory=$true)]
     [string]$ClientId,
@@ -74,8 +74,6 @@ param(
 # Login using a service principal
 $credential = New-Object System.Management.Automation.PSCredential($ClientId, (ConvertTo-SecureString $ClientSecret -AsPlainText -Force))
 Connect-AzAccount -ServicePrincipal -Tenant $TenantId -Credential $credential
-
-
 
 # Get all subscriptions
 $subscriptions = Get-AzSubscription
@@ -141,7 +139,3 @@ module "{0}-recommended-alerts" {{
 }
 
 terraform fmt
-# terraform init
-# terraform validate
-# terraform plan -out=plan.tfplan
-# terraform apply plan.tfplan
