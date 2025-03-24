@@ -101,7 +101,7 @@ param(
     [string]$TenantId,
 
     [Parameter(Mandatory=$false)]
-    [int]$AvailableMemoryBytesThreshold = 1000000000,
+    [Int64]$AvailableMemoryBytesThreshold = 1000000000,
 
     [Parameter(Mandatory=$false)]
     [int]$DataDiskIopsConsumedPercentageThreshold = 95,
@@ -113,16 +113,16 @@ param(
     [int]$MonitoringMetricAlertSeverity = 3,
 
     [Parameter(Mandatory=$false)]
-    [int]$MonitoringMetricAlertThreshold = 200000000000,
+    [Int64]$MonitoringMetricAlertThreshold = 200000000000,
 
     [Parameter(Mandatory=$false)]
     [int]$MonitoringMetricAlertWindowSize = 5,
 
     [Parameter(Mandatory=$false)]
-    [int]$NetworkInTotalThreshold = 500000000000,
+    [Int64]$NetworkInTotalThreshold = 500000000000,
 
     [Parameter(Mandatory=$false)]
-    [int]$NetworkOutTotalThreshold = 200000000000,
+    [Int64]$NetworkOutTotalThreshold = 200000000000,
 
     [Parameter(Mandatory=$false)]
     [int]$OsDiskIopsConsumedPercentageThreshold = 95,
@@ -177,7 +177,7 @@ foreach ($subscription in $subscriptions) {
             $template = @"
 module "{0}-recommended-alerts" {{
   source                              = "obay/recommended-alerts/azurerm"
-  version                             = "0.0.7"
+  version                             = "0.0.8"
   vmname                              = "{0}"
   monitoring_scope                    = "{1}"
   monitoring_resource_group_name      = "{2}"
