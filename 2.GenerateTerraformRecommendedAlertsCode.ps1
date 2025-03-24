@@ -34,6 +34,36 @@
 .PARAMETER TenantId
     The tenant ID for the service principal.
 
+.PARAMETER AvailableMemoryBytesThreshold
+    The threshold for available memory bytes.
+
+.PARAMETER DataDiskIopsConsumedPercentageThreshold
+    The threshold for data disk IOPS consumed percentage.
+
+.PARAMETER MonitoringMetricAlertFrequency
+    The frequency for monitoring metric alerts.
+
+.PARAMETER MonitoringMetricAlertSeverity
+    The severity for monitoring metric alerts.
+
+.PARAMETER MonitoringMetricAlertThreshold
+    The threshold for monitoring metric alerts.
+
+.PARAMETER MonitoringMetricAlertWindowSize
+    The window size for monitoring metric alerts.
+
+.PARAMETER NetworkInTotalThreshold
+    The threshold for network in total.
+
+.PARAMETER NetworkOutTotalThreshold
+    The threshold for network out total.
+
+.PARAMETER OsDiskIopsConsumedPercentageThreshold
+    The threshold for OS disk IOPS consumed percentage.
+
+.PARAMETER PercentageCpuThreshold
+    The threshold for percentage CPU.
+
 .EXAMPLE
     .\GenerateTerraformRecommendedAlertsCode.ps1 -AlertsResourceGroupName "monitoring-rg" -ActionGroupResourceGroupName "monitoring-rg" -ActionGroupName "monitoring-action-group" -TagKey "Environment" -TagValue "Production" -ClientId "00000000-0000-0000-0000-000000000000" -ClientSecret "your-client-secret" -TenantId "11111111-1111-1111-1111-111111111111"
 
@@ -68,7 +98,37 @@ param(
     [string]$ClientSecret,
 
     [Parameter(Mandatory=$true)]
-    [string]$TenantId
+    [string]$TenantId,
+
+    [Parameter(Mandatory=$false)]
+    [int]$AvailableMemoryBytesThreshold = 1000000000,
+
+    [Parameter(Mandatory=$false)]
+    [int]$DataDiskIopsConsumedPercentageThreshold = 95,
+
+    [Parameter(Mandatory=$false)]
+    [int]$MonitoringMetricAlertFrequency = 5,
+
+    [Parameter(Mandatory=$false)]
+    [int]$MonitoringMetricAlertSeverity = 3,
+
+    [Parameter(Mandatory=$false)]
+    [int]$MonitoringMetricAlertThreshold = 200000000000,
+
+    [Parameter(Mandatory=$false)]
+    [int]$MonitoringMetricAlertWindowSize = 5,
+
+    [Parameter(Mandatory=$false)]
+    [int]$NetworkInTotalThreshold = 500000000000,
+
+    [Parameter(Mandatory=$false)]
+    [int]$NetworkOutTotalThreshold = 200000000000,
+
+    [Parameter(Mandatory=$false)]
+    [int]$OsDiskIopsConsumedPercentageThreshold = 95,
+
+    [Parameter(Mandatory=$false)]
+    [int]$PercentageCpuThreshold = 80
 )
 
 # Login using a service principal
@@ -122,11 +182,31 @@ module "{0}-recommended-alerts" {{
   monitoring_scope                    = "{1}"
   monitoring_resource_group_name      = "{2}"
   monitoring_action_group_id          = "{3}"
+  available_memory_bytes_threshold    = {4}
+  data_disk_iops_consumed_percentage_threshold = {5}
+  monitoring_metric_alert_frequency   = {6}
+  monitoring_metric_alert_severity    = {7}
+  monitoring_metric_alert_threshold   = {8}
+  monitoring_metric_alert_window_size = {9}
+  network_in_total_threshold          = {10}
+  network_out_total_threshold         = {11}
+  os_disk_iops_consumed_percentage_threshold = {12}
+  percentage_cpu_threshold            = {13}
 }}
 "@
 
             # Format the template
-            $content = $template -f $vm.Name, $vm.Id, $AlertsResourceGroupName, $actionGroupId
+            $content = $template -f $vm.Name, $vm.Id, $AlertsResourceGroupName, $actionGroupId,
+                      $AvailableMemoryBytesThreshold,
+                      $DataDiskIopsConsumedPercentageThreshold,
+                      $MonitoringMetricAlertFrequency,
+                      $MonitoringMetricAlertSeverity,
+                      $MonitoringMetricAlertThreshold,
+                      $MonitoringMetricAlertWindowSize,
+                      $NetworkInTotalThreshold,
+                      $NetworkOutTotalThreshold,
+                      $OsDiskIopsConsumedPercentageThreshold,
+                      $PercentageCpuThreshold
 
             # Write content to file
             $content | Out-File -FilePath $fileName -Encoding UTF8
