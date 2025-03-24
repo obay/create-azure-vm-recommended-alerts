@@ -8,4 +8,13 @@ $ActionGroupName = "monitoring-action-group"
 $TagKey = "Environment"
 $TagValue = "Production"
 
-.\2.GenerateTerraformRecommendedAlertsCode.ps1 -AlertsResourceGroupName $AlertsResourceGroupName -ActionGroupResourceGroupName $ActionGroupResourceGroupName -ActionGroupName $ActionGroupName -TagKey $TagKey -TagValue $TagValue -ClientId $ClientId -ClientSecret $ClientSecret -TenantId $TenantId -ActionGroupSubscriptionId $ActionGroupSubscriptionId
+.\2.GenerateTerraformRecommendedAlertsCode.ps1 `
+    -AlertsResourceGroupName $AlertsResourceGroupName `
+    -ActionGroupResourceGroupName $ActionGroupResourceGroupName `
+    -ActionGroupName $ActionGroupName `
+    -TagKey $TagKey `
+    -TagValue $TagValue `
+    -ClientId $ClientId `
+    -ClientSecret $ClientSecret `
+    -TenantId $TenantId `
+    -ActionGroupSubscriptionId $ActionGroupSubscriptionId
